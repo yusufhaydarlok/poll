@@ -14,6 +14,8 @@ namespace poll_repository.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasKey(x => x.Id);
+            //email ve id değerlerinin ikisinin birden dengi bir kayıt oluşmaması için
+            builder.HasIndex(d => new {d.Id, d.Email}).IsUnique();
             builder.Property(x => x.Id).UseIdentityColumn();
             builder.Property(x => x.Username).IsRequired().HasMaxLength(200);
             builder.ToTable("Users");

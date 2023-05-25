@@ -1,44 +1,45 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using poll_core.DTOs;
 using poll_core.Models;
+using poll_core.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace poll_api.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : CustomBaseController
     {
-        public static User user = new User();
-
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, IUserService userService, IMapper mapper)
         {
             _configuration = configuration;
+            _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDto request)
+        public async Task<IActionResult> Register(UserDto userDto)
         {
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
-            user.Username = request.Username;
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-
-            return Ok(user);
+            var user = await _userService.AddUserAsync(userDto);
+            var usersDto = _mapper.Map<UserDto>(user);
+            return CreateActionResult(CustomResponseDto<UserDto>.Success(201, usersDto));
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto request)
         {
-            if (user.Username != request.Username)
+            var user = (await _userService.FindAsync(x=> x.Username == request.Username)).FirstOrDefault();
+            var users = await _userService.GetAllAsync();
+            var usersDto = _mapper.Map<List<UserDto>>(users.ToList());
+            if (usersDto.Any(x => x.Username != request.Username))
             {
                 return BadRequest("User not found.");
             }
@@ -111,6 +112,7 @@ namespace poll_api.Controllers
 
         private void SetRefreshToken(RefreshToken newRefreshToken)
         {
+            var user = (await _userService.FindAsync(x => x.Username == request.Username)).FirstOrDefault();
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,

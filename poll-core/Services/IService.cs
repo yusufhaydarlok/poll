@@ -15,6 +15,7 @@ namespace poll_core.Services
         Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
         Task<T> AddAsync(T entity);
         Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression);
         Task UpdateAsync(T entity);
         Task RemoveAsync(T entity);
         Task RemoveRangeAsync(IEnumerable<T> entities);

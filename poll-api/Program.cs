@@ -1,12 +1,20 @@
+using Autofac.Extensions.DependencyInjection;
+using Autofac;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using poll_api.Filters;
+using poll_api.Modules;
 using poll_repository;
+using poll_service.Mapping;
 using Swashbuckle.AspNetCore.Filters;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using poll_service.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +61,15 @@ builder.Services.AddDbContext<AppDbContext>(x =>
         option.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
     });
 });
+
+builder.Services.AddControllers(options => options.Filters.Add(new ValidateFilterAttribute())).AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>());
+builder.Services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
+
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerBuilder.RegisterModule(new RepoServiceModule()));
+
+builder.Services.AddScoped(typeof(NotFoundFilter<>));
+builder.Services.AddAutoMapper(typeof(MapProfile));
 
 var app = builder.Build();
 

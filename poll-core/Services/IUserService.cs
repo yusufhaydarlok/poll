@@ -11,5 +11,6 @@ namespace poll_core.Services
     public interface IUserService : IService<User>
     {
         Task<CustomResponseDto<List<UserWithRoleDto>>> GetUsersWithRole();
+        Task<User> AddUserAsync(UserDto entity);
     }
 }

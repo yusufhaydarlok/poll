@@ -13,7 +13,6 @@ namespace poll_repository
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-
         }
 
         public DbSet<User> Users { get; set; }
@@ -53,7 +52,6 @@ namespace poll_repository
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-
             foreach (var item in ChangeTracker.Entries())
             {
                 if (item.Entity is BaseEntity entityReference)

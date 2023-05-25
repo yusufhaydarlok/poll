@@ -22,10 +22,7 @@ namespace poll_repository.Repositories
 
         public async Task AddAsync(T entity)
         {
-
             await _dbSet.AddAsync(entity);
-
-
         }
 
         public async Task AddRangeAsync(IEnumerable<T> entities)
@@ -38,6 +35,8 @@ namespace poll_repository.Repositories
             return await _dbSet.AnyAsync(expression);
         }
 
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression) => await _dbSet.Where(expression).ToListAsync();
+        
         public IQueryable<T> GetAll()
         {
             return _dbSet.AsNoTracking().AsQueryable();
@@ -50,7 +49,6 @@ namespace poll_repository.Repositories
 
         public void Remove(T entity)
         {
-
             _dbSet.Remove(entity);
         }
 
