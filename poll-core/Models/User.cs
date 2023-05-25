@@ -14,6 +14,7 @@ namespace poll_core.Models
         public byte[] PasswordSalt { get; set; }
         public int RoleId { get; set; }
         public Role Role { get; set; }
+        public ICollection<PollVote> PollVotes { get; set; }
         public string RefreshToken { get; set; } = string.Empty;
         public DateTime TokenCreated { get; set; } = DateTime.Now;
         public DateTime TokenExpires { get; set; }

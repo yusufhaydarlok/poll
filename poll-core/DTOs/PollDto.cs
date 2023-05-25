@@ -11,5 +11,6 @@ namespace poll_core.DTOs
     {
         public string Question { get; set; }
         public ICollection<PollOption> Options { get; set; }
+        public ICollection<PollVote> Votes { get; set; }
     }
 }

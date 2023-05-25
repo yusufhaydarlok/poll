@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace poll_core.Models
 {
-    public class PollVote
+    public class PollVote : BaseEntity
     {
         public int PollId { get; set; }
-        public Poll Poll { get; set; }
+        public virtual Poll Poll { get; set; }
+        public virtual User User { get; set; }
         public int UserId { get; set; }
-        public string Option { get; set; }
+        public int OptionId { get; set; }
     }
 }

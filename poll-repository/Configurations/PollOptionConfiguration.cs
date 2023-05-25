@@ -16,7 +16,8 @@ namespace poll_repository.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).UseIdentityColumn();
             builder.Property(x => x.Answer).IsRequired().HasMaxLength(50);
-            builder.HasOne(x => x.Poll).WithMany(x => x.).HasForeignKey(x => x.PollId);
+            builder.ToTable("PollOptions");
+            builder.HasOne(x => x.Poll).WithMany(x => x.Options).HasForeignKey(x => x.PollId);
         }
     }
 }
