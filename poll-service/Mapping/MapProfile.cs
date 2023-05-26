@@ -15,6 +15,8 @@ namespace poll_service.Mapping
         {
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<Role, RoleDto>().ReverseMap();
+            CreateMap<User, AdminUserDto>().ReverseMap();
+            CreateMap<UserDto, AdminUserDto>().ReverseMap();
             CreateMap<UserUpdateDto, User>();
             CreateMap<User, UserWithRoleDto>();
             CreateMap<Role, RoleWithUsersDto>();

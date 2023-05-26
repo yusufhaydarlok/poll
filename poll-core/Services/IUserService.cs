@@ -12,5 +12,7 @@ namespace poll_core.Services
     {
         Task<CustomResponseDto<List<UserWithRoleDto>>> GetUsersWithRole();
         Task<User> AddUserAsync(UserDto entity);
+        Task<AdminUserDto> AddAdminUserAsync(AdminUserDto entity);
+        string GetMyId(); 
     }
 }

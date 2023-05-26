@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using poll_api.Filters;
@@ -20,13 +21,13 @@ namespace poll_api.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("[action]")]
+        [HttpGet("[action]"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUsersWithRole()
         {
             return CreateActionResult(await _userService.GetUsersWithRole());
         }
 
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin")]
         public async Task<IActionResult> All()
         {
             var users = await _userService.GetAllAsync();
@@ -35,7 +36,7 @@ namespace poll_api.Controllers
         }
 
         [ServiceFilter(typeof(NotFoundFilter<User>))]
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var user = await _userService.GetByIdAsync(id);
@@ -43,22 +44,22 @@ namespace poll_api.Controllers
             return CreateActionResult(CustomResponseDto<UserDto>.Success(200, usersDto));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Save(UserDto userDto)
+        [HttpPost, Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Save(AdminUserDto adminUserDto)
         {
-            var user = await _userService.AddUserAsync(userDto);
-            var usersDto = _mapper.Map<UserDto>(user);
-            return CreateActionResult(CustomResponseDto<UserDto>.Success(201, usersDto));
+            var user = await _userService.AddAdminUserAsync(adminUserDto);
+            var usersDto = _mapper.Map<AdminUserDto>(user);
+            return CreateActionResult(CustomResponseDto<AdminUserDto>.Success(201, usersDto));
         }
 
-        [HttpPut]
+        [HttpPut, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(UserUpdateDto userDto)
         {
             await _userService.UpdateAsync(_mapper.Map<User>(userDto));
             return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Remove(int id)
         {
             var user = await _userService.GetByIdAsync(id);

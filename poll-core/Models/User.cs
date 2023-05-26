@@ -12,7 +12,7 @@ namespace poll_core.Models
         public string Email { get; set; } = string.Empty;
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
-        public int RoleId { get; set; }
+        public int RoleId { get; set; } = 2;
         public Role Role { get; set; }
         public ICollection<PollVote> PollVotes { get; set; }
         public string RefreshToken { get; set; } = string.Empty;

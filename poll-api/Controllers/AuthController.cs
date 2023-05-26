@@ -39,8 +39,9 @@ namespace poll_api.Controllers
             var user = (await _userService.FindAsync(x=> x.Username == request.Username)).FirstOrDefault();
             var users = await _userService.GetAllAsync();
             var usersDto = _mapper.Map<List<UserDto>>(users.ToList());
-            if (usersDto.Any(x => x.Username != request.Username))
+            if (!usersDto.Any(x => x.Username == request.Username))
             {
+
                 return BadRequest("User not found.");
             }
 
@@ -57,20 +58,23 @@ namespace poll_api.Controllers
 
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<string>> RefreshToken()
+        public async Task<ActionResult<string>> RefreshToken(int id)
         {
+            var userId = _userService.GetMyId();
+            var user = (await _userService.FindAsync(x => x.Id.ToString() == userId)).FirstOrDefault();
             var refreshToken = Request.Cookies["refreshToken"];
 
             if (!user.RefreshToken.Equals(refreshToken))
             {
                 return Unauthorized("Invalid Refresh Token.");
             }
+
             else if (user.TokenExpires < DateTime.Now)
             {
                 return Unauthorized("Token expired.");
             }
 
-            string token = CreateToken(user);
+            string token = CreateToken(user); 
             var newRefreshToken = GenerateRefreshToken();
             SetRefreshToken(newRefreshToken);
             return Ok(token);
@@ -80,8 +84,9 @@ namespace poll_api.Controllers
         {
             List<Claim> claims = new List<Claim>
             {
+                new Claim("Id", user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "Admin")
+                new Claim(ClaimTypes.Role, user.RoleId == 1 ? "Admin" : "User" )
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -110,9 +115,11 @@ namespace poll_api.Controllers
             return refreshToken;
         }
 
-        private void SetRefreshToken(RefreshToken newRefreshToken)
+        private async Task SetRefreshToken(RefreshToken newRefreshToken)
         {
-            var user = (await _userService.FindAsync(x => x.Username == request.Username)).FirstOrDefault();
+            var userId = _userService.GetMyId();
+            var user = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+            
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -123,6 +130,8 @@ namespace poll_api.Controllers
             user.RefreshToken = newRefreshToken.Token;
             user.TokenCreated = newRefreshToken.Created;
             user.TokenExpires = newRefreshToken.Expires;
+
+            await _userService.UpdateAsync(user);
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

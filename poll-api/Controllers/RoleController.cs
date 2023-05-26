@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using poll_core.DTOs;
@@ -17,7 +18,7 @@ namespace poll_api.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var roles = await _roleService.GetAllAsync();
@@ -25,7 +26,7 @@ namespace poll_api.Controllers
             return CreateActionResult(CustomResponseDto<List<RoleDto>>.Success(200, rolesDto));
         }
 
-        [HttpGet("[action]/{roleId}")]
+        [HttpGet("[action]/{roleId}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetSingleRoleByIdWithUsersAsync(int roleId)
         {
             return CreateActionResult(await _roleService.GetSingleRoleByIdWithUsersAsync(roleId));

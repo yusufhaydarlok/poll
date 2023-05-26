@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using poll_core.DTOs;
 using poll_core.Models;
@@ -8,6 +9,7 @@ using poll_core.UnitOfWorks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,12 +19,14 @@ namespace poll_service.Services
     public class UserService : Service<User>, IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMapper _mapper;
 
-        public UserService(IGenericRepository<User> repository, IUnitOfWork unitOfWork, IMapper mapper, IUserRepository userRepository) : base(repository, unitOfWork)
+        public UserService(IGenericRepository<User> repository, IUnitOfWork unitOfWork, IMapper mapper, IUserRepository userRepository, IHttpContextAccessor httpContextAccessor) : base(repository, unitOfWork)
         {
             _mapper = mapper;
             _userRepository = userRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<CustomResponseDto<List<UserWithRoleDto>>> GetUsersWithRole()
@@ -50,6 +54,29 @@ namespace poll_service.Services
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
+        }
+
+        public string GetMyId()
+        {
+            var result = string.Empty;
+
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                result = _httpContextAccessor.HttpContext.User.FindFirstValue("Id");
+            }
+
+            return result;
+        }
+
+        public async Task<AdminUserDto> AddAdminUserAsync(AdminUserDto entity)
+        {
+            CreatePasswordHash(entity.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            User user = _mapper.Map<User>(entity);
+            user.Username = entity.Username;
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            return _mapper.Map<AdminUserDto>(await base.AddAsync(user));
         }
     }
 }
