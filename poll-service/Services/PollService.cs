@@ -14,14 +14,14 @@ namespace poll_service.Services
 {
     public class PollService : Service<Poll>, IPollService
     {
-        private readonly IPollService _pollService;
+        private readonly IPollRepository _pollRepository;
         private readonly IMapper _mapper;
-        public PollService(IGenericRepository<Poll> repository, IUnitOfWork unitOfWork, IPollService pollService, IMapper mapper) : base(repository, unitOfWork)
+        public PollService(IGenericRepository<Poll> repository, IUnitOfWork unitOfWork, IPollRepository pollRepository, IMapper mapper) : base(repository, unitOfWork)
         {
-            _pollService = pollService;
+            _pollRepository = pollRepository;
             _mapper = mapper;
         }
-        public Task testPoll(Poll poll)
+        public Task Vote(int pollId, int answerId)
         {
             throw new NotImplementedException();
         }

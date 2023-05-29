@@ -10,7 +10,7 @@ namespace poll_core.Models
     {
         public int PollId { get; set; }
         public virtual Poll Poll { get; set; }
-        public string Answer { get; set; }
+        public List<string> Answer { get; set; }
         public int VoteCount { get; set; }
     }
 }

@@ -9,6 +9,6 @@ namespace poll_core.Services
 {
     public interface IPollService : IService<Poll>
     {
-        Task testPoll(Poll poll);
+        Task Vote(int pollId,int answerId);
     }
 }
